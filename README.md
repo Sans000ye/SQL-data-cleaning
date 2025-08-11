@@ -41,10 +41,12 @@ for inserting the entire raw data to the new table
 
 
 after that, it's cleaning time
-|log id|log detail|sql query used for the operation|
-|------|----------|--------------------------------|
-|1|trim unnecessary spaces of fullname (i.e:"   name   name " to "name name")|UPDATE club_member_info_cleanned SET full_name = TRIM(full_name);
-|2|make every full name be lower capital(instead of capitalize randomly)|UPDATE club_member_info_cleanned SET full_name = LOWER(full_name);|
-|3|give everyone who didn't filled in their marital status a "single" status|UPDATE club_member_info_cleanned  SET martial_status = "single" where martial_status is null;|
+|log id|log detail|reason to change|sql query used for the operation|
+|------|----------|----------------|--------------------------------|
+|1|trim unnecessary spaces of fullname (i.e:"   name   name " to "name name")|there are vastly inconsistent character spacing in the full name of the database, trimming it to make the text more normalize and more beautiful to look at|UPDATE club_member_info_cleanned SET full_name = TRIM(full_name);
+|2|make every full name be lower capital(instead of capitalize randomly)|there are vastly inconsistent character capitalize in the full name of the database, lowercase-ing it to make the text more normalize and more beautiful to look at|UPDATE club_member_info_cleanned SET full_name = LOWER(full_name);|
+|3|give everyone who didn't filled in their marital status a "single" status|there are people who didn't want to fill in the marital status data( either by shame or just simply forgetting it), by setting them as single,we have effectively changed nothing in the grand scheme of the database (the "single" outweigh everyone else whether we adding more or not), all while erasing the issue alltogether |UPDATE club_member_info_cleanned  SET martial_status = "single" where martial_status is null;|
+|4|chaging the age group to look more realistic|although the age group are fine, there are a couple of outlier(1 year old babyy using the service???), by changing it to the average value of the age group (because sqlite did not support the use of median at all), we can remove those outlier and make the dataset more "realistic"|UPDATE club_member_info_cleanned SET age = (SELECT ROUND(AVG(age)) FROM club_member_info_cleanned WHERE age BETWEEN 18 AND 90) WHERE age NOT BETWEEN 18 AND 90;|
+
 
 
